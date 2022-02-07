@@ -388,7 +388,7 @@ const_sens = sens(1,1)
 CI = 0.05
 
 #Simulations
-simulations=500
+simulations=50
 
 
 
@@ -469,9 +469,9 @@ for w1 in tqdm(list(range(0, 12, 2))+[9.6],desc='lambda loop',position=0,leave=T
        #     continue
        # if(w1==9.6)&(w2!=0.2):
        #     continue
-       if not ((w1==10)&(w2==0)):
-           continue
-       elif(w1+w2<=10):
+       # if not ((w1==10)&(w2==0)):
+           # continue
+       if(w1+w2<=10):
            lambda_1=w1/10
            lambda_2=w2/10
            
@@ -749,7 +749,7 @@ for w1 in tqdm(list(range(0, 12, 2))+[9.6],desc='lambda loop',position=0,leave=T
 
 # pd.DataFrame(of_d).to_csv("OF_D.csv")
 # pd.DataFrame(of_cs).to_csv("OF_CS.csv")
-results.to_csv('Results100_500sims.csv')
+results.to_csv('Results50sims.csv')
 
 #%% 9. PLOT HISTOGRAM
 sns.distplot(of_d, hist=True, kde=True, 

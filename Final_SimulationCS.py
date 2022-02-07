@@ -387,8 +387,171 @@ CI = 0.05
 #Simulations
 simulations=200
 
+#%% 7. SIMULATIONS
+# sys.stdout = open("FINALRESULTS.txt", "w")
+results = pd.DataFrame(columns= ['w1',
+                                 'w2',
+                                 'OF_ND',
+                                 'OF_ND_HW',
+                                 'OF_D',
+                                 'OF_D_HW',
+                                 'OF_CS',
+                                 'OF_CS_HW',
+                                 'ET_ND',
+                                 'ET_ND_HW',
+                                 'ET_D',
+                                 'ET_D_HW',
+                                 'ET_CS',
+                                 'ET_CS_HW',
+                                 'EFP_ND',
+                                 'EFP_ND_HW',
+                                 'EFP_D',
+                                 'EFP_D_HW',
+                                 'EFP_CS',
+                                 'EFP_CS_HW',
+                                 'EFN_ND',
+                                 'EFN_ND_HW',
+                                 'EFN_D',
+                                 'EFN_D_HW',
+                                 'EFN_CS',
+                                 'EFN_CS_HW',
+                                 'PART_ND',
+                                 'PART_D']) 
+           
+for w1 in tqdm(range(0, 12, 1),desc='lambda loop',position=0,leave=True):
+   for w2 in range(0,12,1):
+       if(w1+w2<=10):
+           lambda_1=w1/10
+           lambda_2=w2/10
+           
 
 
+           print('\n')
+           print('------------------------------------------------------------------')
+           print('W1(EFN) :'+str(lambda_1)+','+'W2(EFP) :'+str(lambda_2)+'\n')
+           print('------------------------------------------------------------------')
+           print('\n')
+        
+           of_nd=np.empty(simulations)
+           et_nd=np.empty(simulations)
+           efp_nd=np.empty(simulations)
+           efn_nd=np.empty(simulations)
+           part_nd=np.empty(simulations)
+           
+           of_d=np.empty(simulations)
+           et_d=np.empty(simulations)
+           efp_d=np.empty(simulations)
+           efn_d=np.empty(simulations)
+           part_d=np.empty(simulations)
+           
+           of_cs=np.empty(simulations)
+           et_cs=np.empty(simulations)
+           efp_cs=np.empty(simulations)
+           efn_cs=np.empty(simulations)
+           
+           for sim in tqdm(range(0,simulations),desc='sim loop',position=0,leave=True):
+               get_risk_vector()
+               
+               #Current Scenario
+               current_node_list=list(range(0,100,16))
+               current_node_list.reverse()
+               
+               of_cs[sim],et_cs[sim],efp_cs[sim],efn_cs[sim]=calc_meas(current_node_list)
+               
+               #Optimal Scenario
+               risk_vec.sort()
+               g_nd = Graph(pop+1)
+               
+               wt_D =[[None for i in range(pop+1)]for i in range(pop+1)]
+               for i in range(0,pop):
+                  for j in range(i+1,pop+1):
+                        wt_D[i][j]=weight_D(i,j)
+            
+               wt_ND =[[None for i in range(pop+1)]for i in range(pop+1)]
+               for i in range(0,pop):
+                  for j in range(i+1,pop+1):
+                        wt_ND[i][j]=weight_ND(i,j)
+                        
+               for i in range(0,pop):
+                   for j in range(i+1,pop+1):
+                       g_nd.addEdge(i,j,wt_ND[i][j])
+        
+               s = 0
+        
+               node_list=g_nd.shortestPath(s) 
+               part_nd[sim]=len(node_list)
+               of_nd[sim],et_nd[sim],efp_nd[sim],efn_nd[sim]=calc_meas(node_list)
+        
+               g_d = Graph(pop+1) 
+      
+               for i in range(0,pop):
+                   for j in range(i+1,pop+1):
+                       g_d.addEdge(i,j,wt_D[i][j])
+                
+               node_list=g_d.shortestPath(s) 
+               part_d[sim]=len(node_list)
+               of_d[sim],et_d[sim],efp_d[sim],efn_d[sim]=calc_meas(node_list)
+               
+
+           results = results.append({'w1':lambda_1,
+                                     'w2':lambda_2,
+                                     'OF_ND':round(np.mean(of_nd),4),
+                                     
+                                     'OF_ND_HW':np.std(of_nd)*1.96/np.size(of_nd),
+                                     
+                                     'OF_D':round(np.mean(of_d),4),
+                                     
+                                     'OF_D_HW':np.std(of_d)*1.96/np.size(of_d),
+
+                                     
+                                     'OF_CS':round(np.mean(of_cs),4),
+                                     
+                                     'OF_CS_HW':np.std(of_cs)*1.96/np.size(of_cs),
+                                     
+                                     'ET_ND':round(np.mean(et_nd),4),
+
+                                     'ET_ND_HW':np.std(et_nd)*1.96/np.size(et_nd),
+                                     
+                                     'ET_D':round(np.mean(et_d),4),
+                                     
+                                     'ET_D_HW':np.std(et_d)*1.96/np.size(et_d),
+
+                                     
+                                     'ET_CS':round(np.mean(et_cs),4),
+                                     
+                                     'ET_CS_HW':np.std(et_cs)*1.96/np.size(et_cs),
+
+                                     'EFP_ND':round(np.mean(efp_nd),4),
+   
+                                     'EFP_ND_HW':np.std(efp_nd)*1.96/np.size(efp_nd),
+                                     
+                                     
+                                     'EFP_D':round(np.mean(efp_d),4),
+                                     
+                                     'EFP_D_HW':np.std(efp_d)*1.96/np.size(efp_d),
+
+                                     
+                                     'EFP_CS':round(np.mean(efp_cs),4),
+                                     
+                                     'EFP_CS_HW':np.std(efp_cs)*1.96/np.size(efp_cs),
+                                     
+                                     'EFN_ND':round(np.mean(efn_nd),4),
+
+                                     'EFN_ND_HW':np.std(efn_nd)*1.96/np.size(efn_nd),
+                                     
+                                     'EFN_D':round(np.mean(efn_d),4),
+                                     
+                                     'EFN_D_HW':np.std(efn_d)*1.96/np.size(efn_d),
+
+                                     
+                                     'EFN_CS':round(np.mean(efn_cs),4),
+                                     
+                                     'EFN_CS_HW':np.std(efn_cs)*1.96/np.size(efn_cs),
+                                     
+                                     'PART_ND':round(np.mean(part_nd),4),
+
+                                     
+                                     'PART_D':round(np.mean(part_d),4)},ignore_index=True)
 
 
 #%% 7. SIMULATIONS
@@ -400,52 +563,60 @@ results = pd.DataFrame(columns= ['w1',
                                  'OF_ND_B3',
                                  'OF_ND_B4',
                                  'OF_ND_B5',
-                                 'OF_ND_B10',
+                                 'OF_ND_B7',
+                                 'OF_ND_B7_HW',
                                  'OF_D',
                                  'OF_D_B2',
                                  'OF_D_B3',
                                  'OF_D_B4',
                                  'OF_D_B5',
-                                 'OF_D_B10',
+                                 'OF_D_B7',
+                                 'OF_D_B7_HW',
                                  'OF_CS',
                                  'ET_ND',
                                  'ET_ND_B2',
                                  'ET_ND_B3',
                                  'ET_ND_B4',
                                  'ET_ND_B5',
-                                 'ET_ND_B10',
+                                 'ET_ND_B7',
+                                 'ET_ND_B7_HW',
                                  'ET_D',
                                  'ET_D_B2',
                                  'ET_D_B3',
                                  'ET_D_B4',
                                  'ET_D_B5',
-                                 'ET_D_B10',
+                                 'ET_D_B7',
+                                 'ET_D_B7_HW',
                                  'ET_CS',
                                  'EFP_ND',
                                  'EFP_ND_B2',
                                  'EFP_ND_B3',
                                  'EFP_ND_B4',
                                  'EFP_ND_B5',
-                                 'EFP_ND_B10',
+                                 'EFP_ND_B7',
+                                 'EFP_ND_B7_HW',
                                  'EFP_D',
                                  'EFP_D_B2',
                                  'EFP_D_B3',
                                  'EFP_D_B4',
                                  'EFP_D_B5',
-                                 'EFP_D_B10',
+                                 'EFP_D_B7',
+                                 'EFP_D_B7_HW',
                                  'EFP_CS',
                                  'EFN_ND',
                                  'EFN_ND_B2',
                                  'EFN_ND_B3',
                                  'EFN_ND_B4',
                                  'EFN_ND_B5',
-                                 'EFN_ND_B10',
+                                 'EFN_ND_B7',
+                                 'EFN_ND_B7_HW',
                                  'EFN_D',
                                  'EFN_D_B2',
                                  'EFN_D_B3',
                                  'EFN_D_B4',
                                  'EFN_D_B5',
-                                 'EFN_D_B10',
+                                 'EFN_D_B7',
+                                 'EFN_D_B7_HW',
                                  'EFN_CS',
                                  'PART_ND',
                                  'PART_ND_B2',
@@ -460,8 +631,8 @@ results = pd.DataFrame(columns= ['w1',
                                  'PART_D_B5',
                                  'PART_D_B10']) 
            
-for w1 in tqdm(range(0, 12, 2),desc='lambda loop',position=0,leave=True):
-   for w2 in range(0,12,2):
+for w1 in tqdm(range(0, 12,10 ),desc='lambda loop',position=0,leave=True):
+   for w2 in range(0,12,10):
        if(w1+w2<=10):
            lambda_1=w1/10
            lambda_2=w2/10
@@ -556,7 +727,9 @@ for w1 in tqdm(range(0, 12, 2),desc='lambda loop',position=0,leave=True):
                get_risk_vector()
                
                #Current Scenario
-               current_node_list=[97,81,65,49,33,17,0]
+               current_node_list=list(range(0,100,16))
+               current_node_list.reverse()
+               
                of_cs[sim],et_cs[sim],efp_cs[sim],efn_cs[sim]=calc_meas(current_node_list)
                
                #Optimal Scenario
@@ -597,13 +770,13 @@ for w1 in tqdm(range(0, 12, 2),desc='lambda loop',position=0,leave=True):
                of_nd_b3[sim],et_nd_b3[sim],efp_nd_b3[sim],efn_nd_b3[sim],part_nd_b3[sim]=Bellman(wt_ND,3)
                of_nd_b4[sim],et_nd_b4[sim],efp_nd_b4[sim],efn_nd_b4[sim],part_nd_b4[sim]=Bellman(wt_ND,4)
                of_nd_b5[sim],et_nd_b5[sim],efp_nd_b5[sim],efn_nd_b5[sim],part_nd_b5[sim]=Bellman(wt_ND,5)
-               of_nd_b10[sim],et_nd_b10[sim],efp_nd_b10[sim],efn_nd_b10[sim],part_nd_b10[sim]=Bellman(wt_ND,10)
+               of_nd_b10[sim],et_nd_b10[sim],efp_nd_b10[sim],efn_nd_b10[sim],part_nd_b10[sim]=Bellman(wt_ND,7)
 
                of_d_b2[sim],et_d_b2[sim],efp_d_b2[sim],efn_d_b2[sim],part_d_b2[sim]=Bellman(wt_D,2)
                of_d_b3[sim],et_d_b3[sim],efp_d_b3[sim],efn_d_b3[sim],part_d_b3[sim]=Bellman(wt_D,3)
                of_d_b4[sim],et_d_b4[sim],efp_d_b4[sim],efn_d_b4[sim],part_d_b4[sim]=Bellman(wt_D,4)
                of_d_b5[sim],et_d_b5[sim],efp_d_b5[sim],efn_d_b5[sim],part_d_b5[sim]=Bellman(wt_D,5)
-               of_d_b10[sim],et_d_b10[sim],efp_d_b10[sim],efn_d_b10[sim],part_d_b10[sim]=Bellman(wt_D,10)
+               of_d_b10[sim],et_d_b10[sim],efp_d_b10[sim],efn_d_b10[sim],part_d_b10[sim]=Bellman(wt_D,7)
 
            results = results.append({'w1':lambda_1,
                                      'w2':lambda_2,
@@ -612,8 +785,8 @@ for w1 in tqdm(range(0, 12, 2),desc='lambda loop',position=0,leave=True):
                                      'OF_ND_B3':round(np.mean(of_nd_b3),4),
                                      'OF_ND_B4':round(np.mean(of_nd_b4),4),
                                      'OF_ND_B5':round(np.mean(of_nd_b5),4),
-                                     'OF_ND_B10':round(np.mean(of_nd_b10),4),
-                                     
+                                     'OF_ND_B7':round(np.mean(of_nd_b10),4),
+                                     'OF_ND_B7_HW':np.std(of_nd_b10)*1.96/np.size(of_nd_b10),
                                      
                                      
                                      'OF_D':round(np.mean(of_d),4),
@@ -621,7 +794,8 @@ for w1 in tqdm(range(0, 12, 2),desc='lambda loop',position=0,leave=True):
                                      'OF_D_B3':round(np.mean(of_d_b3),4),
                                      'OF_D_B4':round(np.mean(of_d_b4),4),
                                      'OF_D_B5':round(np.mean(of_d_b5),4),
-                                     'OF_D_B10':round(np.mean(of_d_b10),4),
+                                     'OF_D_B7':round(np.mean(of_d_b10),4),
+                                     'OF_D_B7_HW':np.std(of_d_b10)*1.96/np.size(of_d_b10),
                                      
                                      'OF_CS':round(np.mean(of_cs),4),
                                      
@@ -630,14 +804,16 @@ for w1 in tqdm(range(0, 12, 2),desc='lambda loop',position=0,leave=True):
                                      'ET_ND_B3':round(np.mean(et_nd_b3),4),
                                      'ET_ND_B4':round(np.mean(et_nd_b4),4),
                                      'ET_ND_B5':round(np.mean(et_nd_b5),4),
-                                     'ET_ND_B10':round(np.mean(et_nd_b10),4),
+                                     'ET_ND_B7':round(np.mean(et_nd_b10),4),
+                                     'ET_ND_B7_HW':np.std(et_nd_b10)*1.96/np.size(et_nd_b10),
                                      
                                      'ET_D':round(np.mean(et_d),4),
                                      'ET_D_B2':round(np.mean(et_d_b2),4),
                                      'ET_D_B3':round(np.mean(et_d_b3),4),
                                      'ET_D_B4':round(np.mean(et_d_b4),4),
                                      'ET_D_B5':round(np.mean(et_d_b5),4),
-                                     'ET_D_B10':round(np.mean(et_d_b10),4),
+                                     'ET_D_B7':round(np.mean(et_d_b10),4),
+                                     'ET_D_B7_HW':np.std(et_d_b10)*1.96/np.size(et_d_b10),
                                      
                                      'ET_CS':round(np.mean(et_cs),4),
 
@@ -646,14 +822,16 @@ for w1 in tqdm(range(0, 12, 2),desc='lambda loop',position=0,leave=True):
                                      'EFP_ND_B3':round(np.mean(efp_nd_b3),4),
                                      'EFP_ND_B4':round(np.mean(efp_nd_b4),4),
                                      'EFP_ND_B5':round(np.mean(efp_nd_b5),4),
-                                     'EFP_ND_B10':round(np.mean(efp_nd_b10),4),
+                                     'EFP_ND_B7':round(np.mean(efp_nd_b10),4),
+                                     'EFP_ND_B7_HW':np.std(efp_nd_b10)*1.96/np.size(efp_nd_b10),
                                      
                                      'EFP_D':round(np.mean(efp_d),4),
                                      'EFP_D_B2':round(np.mean(efp_d_b2),4),
                                      'EFP_D_B3':round(np.mean(efp_d_b3),4),
                                      'EFP_D_B4':round(np.mean(efp_d_b4),4),
                                      'EFP_D_B5':round(np.mean(efp_d_b5),4),
-                                     'EFP_D_B10':round(np.mean(efp_d_b10),4),
+                                     'EFP_D_B7':round(np.mean(efp_d_b10),4),
+                                     'EFP_D_B7_HW':np.std(efp_d_b10)*1.96/np.size(efp_d_b10),
                                      
                                      'EFP_CS':round(np.mean(efp_cs),4),
                                      
@@ -662,14 +840,16 @@ for w1 in tqdm(range(0, 12, 2),desc='lambda loop',position=0,leave=True):
                                      'EFN_ND_B3':round(np.mean(efn_nd_b3),4),
                                      'EFN_ND_B4':round(np.mean(efn_nd_b4),4),
                                      'EFN_ND_B5':round(np.mean(efn_nd_b5),4),
-                                     'EFN_ND_B10':round(np.mean(efn_nd_b10),4),
+                                     'EFN_ND_B7':round(np.mean(efn_nd_b10),4),
+                                     'EFN_ND_B7_HW':np.std(efn_nd_b10)*1.96/np.size(efn_nd_b10),
                                      
                                      'EFN_D':round(np.mean(efn_d),4),
                                      'EFN_D_B2':round(np.mean(efn_d_b2),4),
                                      'EFN_D_B3':round(np.mean(efn_d_b3),4),
                                      'EFN_D_B4':round(np.mean(efn_d_b4),4),
                                      'EFN_D_B5':round(np.mean(efn_d_b5),4),
-                                     'EFN_D_B10':round(np.mean(efn_d_b10),4),
+                                     'EFN_D_B7':round(np.mean(efn_d_b10),4),
+                                     'EFN_D_B7_HW':np.std(efn_d_b10)*1.96/np.size(efn_d_b10),
                                      
                                      'EFN_CS':round(np.mean(efn_cs),4),
                                      
@@ -736,6 +916,6 @@ for w1 in tqdm(range(0, 12, 2),desc='lambda loop',position=0,leave=True):
            
 # sys.stdout.close()
 #%% 8. OUTPUT TO CSV
-of_d.to_csv('OF_D.csv')
-of_cs.to_csv('OF_CS.csv')
-results.to_csv('Results_200simsCS.csv')
+# of_d.to_csv('OF_D.csv')
+# of_cs.to_csv('OF_CS.csv')
+results.to_csv('qwertyuiop.csv')
